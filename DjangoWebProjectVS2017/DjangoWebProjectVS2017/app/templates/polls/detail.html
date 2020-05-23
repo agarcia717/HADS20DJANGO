@@ -1,0 +1,35 @@
+﻿{% extends "app/layout.html" %}
+{% block content %}
+
+<h2>{{ title }}.</h2>
+<h3>{{ message }}</h3>
+
+<h3>Pregunta: {{ question.question_text }}</h3>
+{% if error_message %}<p><strong style="color:red;"><b>{{ error_message }}</b></strong></p>{% endif %}
+{% csrf_token %}
+
+{% if request.user.is_authenticated %}
+    {% for choice in question.choice_set.all %}
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }} --> nº de veces seleccionada: {{ choice.votes }}  | </label>
+    {% if choice.isCorrect %}
+          <label style="color:darkgreen;">Respuesta CORRECTA</label><br />
+    {% else %}
+        <label style="color:darkred;">Respuesta INCORRECTA</label><br />
+    {% endif %}
+    {% endfor %}
+        <a href="{% url 'choice_add' question.id %}"><h3>Insertar Opciones</h3></a> 
+        <a href="{% url 'chart' question.id %}"> <h3>Ver resultado de la votacion</h3> </a><br />
+
+{% else %}
+    <form action="{% url 'vote' question.id %}" method="POST">
+    {% csrf_token %}
+    {% for choice in question.choice_set.all %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+    {% endfor %}
+    <input type="submit" value="Vote" />
+    </form>
+{% endif %}
+
+
+{% endblock %}
